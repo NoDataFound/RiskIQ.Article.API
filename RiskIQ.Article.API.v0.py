@@ -6,8 +6,6 @@
 #author__ = 'Cory Kennedy (cory@riskiq.com)'
 #version__ = '1.0.0'
 import requests
-import ujson as json
-import sys
 from datetime import datetime
 
 class style():
@@ -24,71 +22,82 @@ class style():
     UNDERLINE = '\033[4m'
     RESET = '\033[0m'
 
-print("")
-print(style.YELLOW+"Note: Below values can be found here: https://community.riskiq.com/settings")
-print (style.BLACK+"----------------------------------------------------------------")
-username = input(style.GREEN+'Enter your https://community.riskiq.com email address: ')
-key = input(style.CYAN+'Enter your https://community.riskiq.com API key: ')
-headers = {'Content-Type': 'application/json'}
+class RisqIQ_Article_Parser():
+    def __init__(self,username, key):
+        self.username = username
+        self.key = key
+        self.headers = {'Content-Type': 'application/json'}
+        self.index = self.get_article_index()
 
-def all_articles():
-    r = requests.get('https://api.riskiq.net/pt/v2/articles', headers=headers, auth=(username, key))
-    data = r.json()
-    for article in data['articles']:
-        print (style.BLACK+"---"+style.GREEN+"GUID"+style.BLACK+"-----------------"+style.CYAN+"TITLE"+style.BLACK+"--------------")
-        print (style.GREEN+article['guid'], style.BLACK+"| "+style.CYAN+article['title'])
-        print (style.BLACK+"-------------------------------------------")
-        print (style.YELLOW+"TAGS: ")
-        for tag in article['tags']:
-            print ("   " +style.WHITE+tag)
-        print ("")  
+    def get_article_index(self):
+        r = requests.get('https://api.riskiq.net/pt/v2/articles', headers=self.headers, auth=(self.username, self.key))
+        data = r.json()
+        return data
 
+    def all_articles(self):
+        for article in self.index['articles']:
+            print (style.BLACK+"---"+style.GREEN+"GUID"+style.BLACK+"-----------------"+style.CYAN+"TITLE"+style.BLACK+"--------------")
+            print (style.GREEN+article['guid'], style.BLACK+"| "+style.CYAN+article['title'])
+            print (style.BLACK+"-------------------------------------------")
+            print (style.YELLOW+"TAGS: ")
+            for tag in article['tags']:
+                print ("   " +style.WHITE+tag)
+            print ("")  
 
-def guid_articles():
-    guid = input(style.GREEN+'Enter Article GUID: ')
-    url = ('https://api.riskiq.net/pt/v2/articles/indicators?articleGuid=' + guid)
-    r = requests.get(url,  headers=headers, auth=(username, key))
-    data = r.json()
-    for indicators in data['indicators']:
-        print (style.GREEN+indicators['type'], "," + style.CYAN+indicators['value'])
-        print ("")  
+    def guid_articles(self):
+        guid = input(style.GREEN+'Enter Article GUID: ')
+        url = ('https://api.riskiq.net/pt/v2/articles/indicators?articleGuid=' + guid)
+        r = requests.get(url,  headers=self.headers, auth=(self.username, self.key))
+        data = r.json()
+        for indicators in data['indicators']:
+            print (style.GREEN+indicators['type'], "," + style.CYAN+indicators['value']) 
         
  
-def show_menu():
-    print("")
-    print (style.CYAN+"  +----------------------------------------------------------------+")
-    print (style.CYAN+"""  |   .______       __       _______. __  ___  __    ______        | 
-  |   |   _  \     |  |     /       ||  |/  / |  |  /  __  \       |
-  |   |  |_)  |    |  |    |   (----`|  '  /  |  | |  |  |  |      |
-  |   |      /     |  |     \   \    |    <   |  | |  |  |  |      |  
-  |   |  |\  \----.|  | .----)   |   |  .  \  |  | |  `--'  '--.   |
-  |   | _| `._____||__| |_______/    |__|\__\ |__|  \_____\_API_|  |""")
-    print (style.CYAN+"  |",style.MAGENTA+"                           https://api.riskiq.net/api/articles",style.CYAN+"|")                         
-    print (style.CYAN+"  +----------------------------------------------------------------+")
-    print(style.RESET)
-    r = requests.get('https://api.riskiq.net/pt/v2/articles', headers=headers, auth=(username, key))
-    data = r.json()
-    print("Here are our latest articles: ")
-    for article in data['articles'][:5]:
-        print (style.BLACK+"---"+style.GREEN+"GUID"+style.BLACK+"---------------------------------------------------------------"+style.BLUE+"TITLE"+style.BLACK+"--------------------------------------------------")
-        print (style.GREEN+article['guid'], style.BLACK+"| "+style.CYAN+article['title'])
-    print (style.BLACK+"-----------------------------------------------------------------------------------------------------------------------------")
-    print ("")
-    print (style.BLUE+"1) List all RiskIQ TIP Article "+ style.RESET + style.GREEN+ "GUIDs" + style.RESET +", " + style.CYAN+ "Titles" + style.BLUE + " and " + style.RESET + style.WHITE+"TAGS")
-    print (style.CYAN+"2) Get all indicators from a single article GUID")
-    print(style.RESET)
-    print (style.GREEN+"Q) Exit\n")
-    print(style.RESET)
+    def show_menu(self):
+        print("")
+        print (style.CYAN+"  +----------------------------------------------------------------+")
+        print (style.CYAN+"""  |   .______       __       _______. __  ___  __    ______        | 
+    |   |   _  \     |  |     /       ||  |/  / |  |  /  __  \       |
+    |   |  |_)  |    |  |    |   (----`|  '  /  |  | |  |  |  |      |
+    |   |      /     |  |     \   \    |    <   |  | |  |  |  |      |  
+    |   |  |\  \----.|  | .----)   |   |  .  \  |  | |  `--'  '--.   |
+    |   | _| `._____||__| |_______/    |__|\__\ |__|  \_____\_API_|  |""")
+        print (style.CYAN+"  |",style.MAGENTA+"                           https://api.riskiq.net/api/articles",style.CYAN+"|")                         
+        print (style.CYAN+"  +----------------------------------------------------------------+")
+        print(style.RESET)
+        print("Here are our latest articles: ")
+        for article in self.index['articles'][:5]:
+            print (style.BLACK+"---"+style.GREEN+"GUID"+style.BLACK+"---------------------------------------------------------------"+style.BLUE+"TITLE"+style.BLACK+"--------------------------------------------------")
+            print (style.GREEN+article['guid'], style.BLACK+"| "+style.CYAN+article['title'])
+        print (style.BLACK+"-----------------------------------------------------------------------------------------------------------------------------")
+        print ("")
+        print (style.BLUE+"1) List all RiskIQ TIP Article "+ style.RESET + style.GREEN+ "GUIDs" + style.RESET +", " + style.CYAN+ "Titles" + style.BLUE + " and " + style.RESET + style.WHITE+"TAGS")
+        print (style.CYAN+"2) Get all indicators from a single article GUID")
+        print(style.RESET)
+        print (style.GREEN+"Q) Exit\n")
+        print(style.RESET)
  
 def menu():
+    try:
+        from secrets import EMAIL, APIKEY
+        article_parser = RisqIQ_Article_Parser(EMAIL, APIKEY)
+
+    except:
+        print("")
+        print(style.YELLOW+"Note: Below values can be found here: https://community.riskiq.com/settings")
+        print (style.BLACK+"----------------------------------------------------------------")
+        username = input(style.GREEN+'Enter your https://community.riskiq.com email address: ')
+        key = input(style.CYAN+'Enter your https://community.riskiq.com API key: ')
+        article_parser = RisqIQ_Article_Parser(username, key)
+
     while True:
-        show_menu()
+        article_parser.show_menu()
         choice = input('Enter your choice: ').lower()
         print ("")
         if choice == '1':
-            all_articles()
+            article_parser.all_articles()
         elif choice == '2':
-            guid_articles()        
+            article_parser.guid_articles()        
         elif choice == 'q':
             return
         else:
