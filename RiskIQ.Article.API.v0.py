@@ -22,7 +22,7 @@ class style():
     UNDERLINE = '\033[4m'
     RESET = '\033[0m'
 
-class RisqIQ_Article_Parser():
+class RiskIQ_Article_Parser():
     def __init__(self,username, key):
         self.username = username
         self.key = key
@@ -80,7 +80,7 @@ class RisqIQ_Article_Parser():
 def menu():
     try:
         from secrets import EMAIL, APIKEY
-        article_parser = RisqIQ_Article_Parser(EMAIL, APIKEY)
+        article_parser = RiskIQ_Article_Parser(EMAIL, APIKEY)
 
     except:
         print("")
@@ -88,7 +88,7 @@ def menu():
         print (style.BLACK+"----------------------------------------------------------------")
         username = input(style.GREEN+'Enter your https://community.riskiq.com email address: ')
         key = input(style.CYAN+'Enter your https://community.riskiq.com API key: ')
-        article_parser = RisqIQ_Article_Parser(username, key)
+        article_parser = RiskIQ_Article_Parser(username, key)
 
     while True:
         article_parser.show_menu()
